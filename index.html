@@ -110,8 +110,8 @@
                             p = particles[0][particle_id + i];
                         }
                         
-                        p.x = w/2 + Math.cos(p.angle) * (p.radius * waveform * explode);
-                        p.y = h/2 + Math.sin(p.angle) * (p.radius * waveform * explode);
+                        p.x = w/2 + Math.cos(p.angle) * (p.radius * waveform);
+                        p.y = h/2 + Math.sin(p.angle) * (p.radius * waveform);
                     }
                 }
                     
@@ -130,8 +130,8 @@
                                 p = particles[k][particle_id + i];
                             }
                             
-                            p.x = w/2 + Math.cos(p.angle) * (p.radius * waveform_array[i] * explode);
-                            p.y = h/2 + Math.sin(p.angle) * (p.radius * waveform_array[i] * explode);
+                            p.x = w/2 + Math.cos(p.angle) * (p.radius * waveform_array[i]);
+                            p.y = h/2 + Math.sin(p.angle) * (p.radius * waveform_array[i]);
                         }
                     }
                 }
