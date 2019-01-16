@@ -44,7 +44,22 @@
                     gradient = ctx.createRadialGradient(w/2, h/2, w/2, w/2, h/2, w/4);
                     gradient.addColorStop(1, rgb(255, 120, 0));
                     gradient.addColorStop(0, rgb(255, 0, 0));
+                    
+                    
+                } else if (e.keyCode == 55) {
+                    //7: symmetry number: 2
+                    symmetry_num = 2;
+                } else if (e.keyCode == 56) {
+                    //8: symmetry number: 4
+                    symmetry_num = 4;
+                } else if (e.keyCode == 57) {
+                    //9: symmetry number: 8
+                    symmetry_num = 8;
+                } else if (e.keyCode == 48) {
+                    //0: symmetry number: 20
+                    symmetry_num = 20;
                 }
+                
             }, false);
             
             
@@ -62,7 +77,8 @@
             var gap = max_radius / num_rings;
             var waveform_array = [];
             var waveform_intensity = h / 1.5;
-                
+            var explode = 1;
+    
             //initial colours
             var line_colour = rgb(255, 255, 255);
             var gradient = ctx.createRadialGradient(w/2, h/2, w/2, w/2, h/2, w/4);
@@ -91,8 +107,10 @@
                 particles[i].push(particle);
             }
             
+            console.log(particles);
             
-            function drawParticles() {
+            
+            function drawParticles(explode) {
                 //calculate first ring shape using mic.js
                 for (j = 0; j < symmetry_num; j++) {
                     for (i = 0; i < num_particles / symmetry_num; i++) {
@@ -110,8 +128,8 @@
                             p = particles[0][particle_id + i];
                         }
                         
-                        p.x = w/2 + Math.cos(p.angle) * (p.radius * waveform);
-                        p.y = h/2 + Math.sin(p.angle) * (p.radius * waveform);
+                        p.x = w/2 + Math.cos(p.angle) * (p.radius * waveform * explode);
+                        p.y = h/2 + Math.sin(p.angle) * (p.radius * waveform * explode);
                     }
                 }
                     
@@ -130,8 +148,8 @@
                                 p = particles[k][particle_id + i];
                             }
                             
-                            p.x = w/2 + Math.cos(p.angle) * (p.radius * waveform_array[i]);
-                            p.y = h/2 + Math.sin(p.angle) * (p.radius * waveform_array[i]);
+                            p.x = w/2 + Math.cos(p.angle) * (p.radius * waveform_array[i] * explode);
+                            p.y = h/2 + Math.sin(p.angle) * (p.radius * waveform_array[i] * explode);
                         }
                     }
                 }
@@ -154,28 +172,39 @@
                 
             
             ctx.lineWidth = 1.5;
-            ctx.strokeStyle = line_colour;
-            ctx.fillStyle = rgb(255);
-            frameRate = 120;
+            
             
             //requests animation frame
             function draw() {
+                frameRate = 120;
                 volume = mic.getRMS(mic.spectrum);
                 peak_vol = mic.peak_volume;
                 
+                ctx.background(0, map(volume, 0, 100, 0.4, 0.04));
                 
-                drawParticles();
+                ctx.strokeStyle = line_colour;
+                drawParticles(explode);
                 drawConnections();
                 
+                ctx.fillStyle = rgb(255);
                 ctx.fillEllipse(w/2, h/2, 2, 2);
                 
-                ctx.background(0, map(volume, 0, 100, 0.4, 0.04));
+                
                 
                 if (volume < peak_vol - 20) {
                     symmetry_num = 2;
+                    explode = 1;
                 } else if (volume >= peak_vol - 20) {
                     symmetry_num = 4;
+                    explode = 1;
+                    /*
+                    ctx.strokeStyle = rgb(0);
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, w, h);
+                    explode = 1.5;
+                    */
                 }
+                
             }
             
         </script>
