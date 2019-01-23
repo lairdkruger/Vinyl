@@ -34,30 +34,14 @@
             document.addEventListener('keypress', function (e) {
                 if (e.keyCode == 49) {
                     //1: basic black and white
-                    line_colour = rgb(255, 255, 255);
-                    gradient = ctx.createRadialGradient(w/2, h/2, w/2, w/2, h/2, w/4);
-                    gradient.addColorStop(1, rgb(255, 255, 255));
-                    gradient.addColorStop(0, rgb(235, 235, 235));
+                    mode = "standard";
+                    line_color = rgb(255, 255, 255);
                 } else if (e.keyCode == 50) {
-                    //2: black and red
-                    line_colour = rgb(250, 0, 0);
-                    gradient = ctx.createRadialGradient(w/2, h/2, w/2, w/2, h/2, w/4);
-                    gradient.addColorStop(1, rgb(255, 120, 0));
-                    gradient.addColorStop(0, rgb(255, 0, 0));
-                    
-                    
-                } else if (e.keyCode == 55) {
-                    //7: symmetry number: 2
-                    symmetry_num = 2;
-                } else if (e.keyCode == 56) {
-                    //8: symmetry number: 4
-                    symmetry_num = 4;
-                } else if (e.keyCode == 57) {
-                    //9: symmetry number: 8
-                    symmetry_num = 8;
-                } else if (e.keyCode == 48) {
-                    //0: symmetry number: 20
-                    symmetry_num = 20;
+                    //2: lit
+                    mode = "lit";
+                } else if (e.keyCode == 51) {
+                    //3: lit II
+                    mode = "lit II";
                 }
                 
             }, false);
@@ -78,17 +62,19 @@
             var waveform_array = [];
             var waveform_intensity = h / 1.5;
             var explode = 1;
-    
-            //initial colours
-            var line_colour = rgb(255, 255, 255);
-            var gradient = ctx.createRadialGradient(w/2, h/2, w/2, w/2, h/2, w/4);
-            gradient.addColorStop(1, rgb(255, 255, 255));
-            gradient.addColorStop(0, rgb(235, 235, 235));
             
+            //color setup
+            var hue = 0;
+            var line_color = rgb(255, 255, 255);
+            var color_array = [];
             
+            //color modes: standard, palette, lit, lit II, lit III
+            var mode = "standard";
+        
             //add a number of particles to particles
             for (i = 0; i < num_rings; i++) {
                 particles.push([]);
+                color_array.push([]);
                 for (j = 0; j < num_particles; j++) {
                     addParticle(i, j);
                 }
@@ -157,7 +143,31 @@
             
             
             function drawConnections() {
+                
+                if (mode == "lit II") {
+                    volume = mic.getRMS(mic.spectrum);
+                    lightness = map(volume, 0, 100, 40, 70, true);
+                    add = map(volume, 0, 100, 0, 2.5) ** 3;
+
+                    if (hue == 360) {
+                        hue = 0;
+                    } else {
+                        hue += add;
+                    }
+                    
+                    color_array[num_rings] = hsl(hue, 70, lightness);
+                    
+                    for (k = 0; k < num_rings; k++) {
+                        color_array[k] = color_array[k + 1];
+                    }
+                }
+                
+                
                 for (j = 0; j < num_rings; j++) {
+                    if (mode == "lit II") {
+                        ctx.strokeStyle = color_array[j];
+                    }
+                    
                     for (i = 0; i < num_particles - 1; i++) {
                         p1 = particles[j][i];
                         p2 = particles[j][i + 1];
@@ -180,16 +190,32 @@
                 volume = mic.getRMS(mic.spectrum);
                 peak_vol = mic.peak_volume;
                 
-                ctx.background(0, map(volume, 0, 100, 0.4, 0.04));
+                ctx.background(0, map(volume, 0, 100, 0.35, 0.01));
                 
-                ctx.strokeStyle = line_colour;
                 drawParticles(explode);
                 drawConnections();
                 
                 ctx.fillStyle = rgb(255);
                 ctx.fillEllipse(w/2, h/2, 2, 2);
                 
-                
+                if (mode == "standard") {
+                    ctx.strokeStyle = line_color;
+                } else if (mode == "lit") {
+                    lightness = map(volume, 0, 100, 40, 70, true);
+                    add = map(volume, 0, 100, 0, 3.5) ** 3;
+
+                    if (volume > peak_vol - 20) {
+                        explode = 2;
+                        hue = randomInt(0, 360);
+                    } else {
+                        if (hue == 360) {
+                            hue = 0;
+                        } else {
+                            hue += add;
+                        }
+                    }
+                    ctx.strokeStyle = hsl(hue, 70, lightness);
+                }
                 
                 if (volume < peak_vol - 20) {
                     symmetry_num = 2;
@@ -197,12 +223,6 @@
                 } else if (volume >= peak_vol - 20) {
                     symmetry_num = 4;
                     explode = 1;
-                    /*
-                    ctx.strokeStyle = rgb(0);
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, 0, w, h);
-                    explode = 1.5;
-                    */
                 }
                 
             }
