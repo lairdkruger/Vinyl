@@ -11,4 +11,5 @@ live demo at https://lairdkruger.github.io/Vinyl/
 controls (key press):
 - double click for full screen mode
 - 1: black and white colour scheme
-- 2: black and red colour scheme
+- 2: colourful neon colour scheme
+- 3: psychedelic neon colour scheme
